@@ -1,40 +1,24 @@
 use std::io::{self, Write};
 
 fn main() {
-    let from_temperature: f64 = loop {
+    let (from_temperature, from_unit): (f64, char) = loop {
         match prompt("enter temperature: ") {
-            Ok(input) => match input.parse() {
-                Ok(num) => break num,
-                Err(_) => println!("temperature must be a number!"),
+            Ok(input) => match (input[0..input.len() - 1].parse(), input.chars().last()) {
+                (Ok(temperature), Some('C')) => break (temperature, 'C'),
+                (Ok(temperature), Some('F')) => break (temperature, 'F'),
+                _ => println!("temperature must in this format (e.g. 37C or 98.6F)"),
             },
-            Err(_) => println!("failed to read line"),
+            Err(_) => println!("failed to read-line!"),
         };
     };
 
-    let from_unit: char = loop {
-        match prompt("enter unit (C|F): ") {
-            Ok(input) => match input.to_uppercase().as_str() {
-                "C" => break 'C',
-                "F" => break 'F',
-                _ => println!("unit must be \"C\" or \"F\"!"),
-            },
-            Err(_) => println!("failed to read line"),
-        };
-    };
-
-    let to_temperature: f64 = match from_unit {
-        'C' => from_temperature * 9.0 / 5.0 + 32.0,
-        'F' => (from_temperature - 32.0) * 5.0 / 9.0,
+    let (to_temperature, to_unit): (f64, char) = match from_unit {
+        'C' => (from_temperature * 9.0 / 5.0 + 32.0, 'F'),
+        'F' => ((from_temperature - 32.0) * 5.0 / 9.0, 'C'),
         _ => panic!("unreachable state!!!"),
     };
 
-    let to_unit: char = match from_unit {
-        'C' => 'F',
-        'F' => 'C',
-        _ => panic!("unreachable state!!!"),
-    };
-
-    println!("from {from_temperature:.2}{from_unit} to {to_temperature:.2}{to_unit}",);
+    println!("converted temperature: {to_temperature:.2}{to_unit}",);
 }
 
 fn prompt(prompt: &str) -> Result<String, io::Error> {
