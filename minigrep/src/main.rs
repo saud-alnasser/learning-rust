@@ -2,10 +2,8 @@ use minigrep::{self, Config};
 use std::{env, process};
 
 fn main() {
-    let args = env::args().into_iter();
-
-    let config = Config::build(args).unwrap_or_else(|err| {
-        eprintln!("problem parsing arguments: {err}");
+    let config = Config::build(env::args()).unwrap_or_else(|e| {
+        eprintln!("parsing arguments error: {e}");
         process::exit(1);
     });
 
